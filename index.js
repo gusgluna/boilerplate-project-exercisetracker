@@ -33,10 +33,15 @@ app.post("/api/users", (req, res) => {
   });
 
   newUsername.save((error, data) => {
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+    if (error) return res.status(400).json({ error: error.message });
     return res.status(201).json({ username: data.username, _id: data._id });
+  });
+});
+
+app.get("/api/users", (req, res) => {
+  User.find({}).exec((error, results) => {
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(200).send(results);
   });
 });
 
