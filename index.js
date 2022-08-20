@@ -87,7 +87,6 @@ app.post(
 //<route: /api/users/:_id/logs>
 app.get("/api/users/:_id/logs", (req, res) => {
   const { from, to, limit } = req.query;
-  console.log(from, to, limit);
   const fromDate = from ? new Date(from) : new Date(0);
   const toDate = to ? new Date(to) : new Date();
   if (req.params._id == "") return res.status(400).json({ error: "id" });
