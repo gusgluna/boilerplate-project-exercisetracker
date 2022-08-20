@@ -23,11 +23,13 @@ db.once("open", () => console.log("Connected to Database"));
 
 //<Import models>
 const User = require("./models/user");
+const Exercise = require("./models/exercise");
 //</Import models>
 
+//Routes
+//<route: /api/users>
 app.post("/api/users", (req, res) => {
   const userName = req.body.username;
-  // console.log(userName);
   const newUsername = new User({
     username: userName,
   });
@@ -44,6 +46,43 @@ app.get("/api/users", (req, res) => {
     res.status(200).send(results);
   });
 });
+//<>
+
+//<route: /api/users/:_id/exercises>
+app.post(
+  "/api/users/:_id/exercises",
+  (req, res, next) => {
+    const userId = req.params._id;
+    User.findOne({ _id: userId }).exec((error, result) => {
+      res.locals.userName = result.username;
+      next();
+    });
+  },
+  (req, res) => {
+    const exerciseDate =
+      req.body.date == "" ? new Date() : new Date(req.body.date);
+
+    const newExercise = new Exercise({
+      _idUsername: req.params._id,
+      username: res.locals.userName,
+      description: req.body.description,
+      duration: req.body.duration,
+      date: exerciseDate,
+    });
+
+    newExercise.save((error, data) => {
+      if (error) return res.status(400).json({ error: error.message });
+      return res.status(201).json({
+        _id: data._idUsername,
+        username: data.username,
+        date: data.date.toDateString(),
+        duration: data.duration,
+        description: data.description,
+      });
+    });
+  }
+);
+//<>
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
