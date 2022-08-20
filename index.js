@@ -59,8 +59,7 @@ app.post(
     });
   },
   (req, res) => {
-    const exerciseDate =
-      req.body.date == "" ? new Date() : new Date(req.body.date);
+    const exerciseDate = req.body.date ? new Date(req.body.date) : new Date();
 
     const newExercise = new Exercise({
       _idUsername: req.params._id,
