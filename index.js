@@ -87,19 +87,30 @@ app.post(
 
 //<route: /api/users/:_id/logs>
 app.get("/api/users/:_id/logs", (req, res) => {
+  if (req.params._id == "") return res.status(400).json({ error: "id" });
   Exercise.find({ _idUsername: req.params._id }).exec((error, results) => {
     const logs = results.map((result) => {
       return {
         description: result.description,
         duration: result.duration,
-        date: result.date.toDateString(),
+        date: result.date,
+      };
+    });
+    const logsSorted = logs.sort(
+      (objA, objB) => Number(objB.date) - Number(objA.date)
+    );
+    const logsSortedDateString = logsSorted.map((log) => {
+      return {
+        description: log.description,
+        duration: log.duration,
+        date: log.date.toDateString(),
       };
     });
     return res.status(200).json({
       _id: req.params._id,
       username: results[0].username,
       count: results.length,
-      log: logs,
+      log: logsSortedDateString,
     });
   });
 });
