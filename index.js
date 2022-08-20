@@ -82,7 +82,28 @@ app.post(
     });
   }
 );
-//<>
+
+//</>
+
+//<route: /api/users/:_id/logs>
+app.get("/api/users/:_id/logs", (req, res) => {
+  Exercise.find({ _idUsername: req.params._id }).exec((error, results) => {
+    const logs = results.map((result) => {
+      return {
+        description: result.description,
+        duration: result.duration,
+        date: result.date.toDateString(),
+      };
+    });
+    return res.status(200).json({
+      _id: req.params._id,
+      username: results[0].username,
+      count: results.length,
+      log: logs,
+    });
+  });
+});
+//</>
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
