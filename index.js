@@ -86,32 +86,41 @@ app.post(
 
 //<route: /api/users/:_id/logs>
 app.get("/api/users/:_id/logs", (req, res) => {
+  const { from, to, limit } = req.query;
+  console.log(from, to, limit);
+  const fromDate = from ? new Date(from) : new Date(0);
+  const toDate = to ? new Date(to) : new Date();
   if (req.params._id == "") return res.status(400).json({ error: "id" });
-  Exercise.find({ _idUsername: req.params._id }).exec((error, results) => {
-    const logs = results.map((result) => {
-      return {
-        description: result.description,
-        duration: result.duration,
-        date: result.date,
-      };
+  Exercise.find({ _idUsername: req.params._id })
+    .limit(+limit)
+    .where("date")
+    .gte(fromDate)
+    .lte(toDate)
+    .exec((error, results) => {
+      const logs = results.map((result) => {
+        return {
+          description: result.description,
+          duration: result.duration,
+          date: result.date,
+        };
+      });
+      let logsSorted = logs.sort(
+        (objA, objB) => Number(objB.date) - Number(objA.date)
+      );
+      const logsSortedDateString = logsSorted.map((log) => {
+        return {
+          description: log.description,
+          duration: log.duration,
+          date: log.date.toDateString(),
+        };
+      });
+      return res.status(200).json({
+        _id: req.params._id,
+        username: results[0].username,
+        count: logsSortedDateString.length,
+        log: logsSortedDateString,
+      });
     });
-    const logsSorted = logs.sort(
-      (objA, objB) => Number(objB.date) - Number(objA.date)
-    );
-    const logsSortedDateString = logsSorted.map((log) => {
-      return {
-        description: log.description,
-        duration: log.duration,
-        date: log.date.toDateString(),
-      };
-    });
-    return res.status(200).json({
-      _id: req.params._id,
-      username: results[0].username,
-      count: results.length,
-      log: logsSortedDateString,
-    });
-  });
 });
 //</>
 
